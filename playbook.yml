@@ -13,13 +13,6 @@
     - pihole
   remote_user: debian
   become: yes
-
-- name: Ansible playbook for configuring homebridge
-  hosts: homebridge
-  roles:
-    - homebridge
-  remote_user: debian
-  become: yes
   
 - name: Ansible playbook for configuring docker
   hosts: docker
