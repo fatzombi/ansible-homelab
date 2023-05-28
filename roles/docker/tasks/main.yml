@@ -1,0 +1,75 @@
+---
+
+- name: Add Apt signing key from official docker repo
+  apt_key:
+    url: https://download.docker.com/linux/debian/gpg
+    state: present
+
+- name: add docker official repository for Debian Bullseye
+  apt_repository:
+    repo: deb [arch=amd64] https://download.docker.com/linux/debian bullseye stable
+    state: present
+
+- name: Index new repo into the cache
+  become: yes
+  apt:
+    name: "*"
+    state: latest
+    update_cache: yes
+    force_apt_get: yes
+
+- name: actually install docker
+  apt:
+    name: "docker-ce"
+    state: latest
+
+- name: Install docker-compose
+  get_url: 
+    url: https://github.com/docker/compose/releases/download/v2.2.3/docker-compose-linux-x86_64
+    dest: /usr/local/bin/docker-compose
+    mode: 'u+x,g+x'
+
+- name: install docker pip package
+  pip:
+    name:
+      - docker
+      - docker-compose
+  tags: docker
+
+- name: create directory to house our docker-compose
+  file: 
+    path: /home/debian/docker/ 
+    state: directory
+    owner: debian
+    group: debian
+  tags: docker
+
+- name: copy docker-compose.yml
+  copy: 
+    src: templates/docker.conf.j2 
+    dest: /home/debian/docker/docker-compose.yml
+    owner: debian
+    group: debian
+  tags: docker
+
+- name: create docker_data directory
+  file: 
+    path: /home/debian/docker/docker_data/ 
+    state: directory
+    owner: debian
+    group: debian
+  tags: docker
+
+- name: copy supporting files
+  copy: 
+    src: roles/docker/templates/docker_data/ 
+    dest: /home/debian/docker/docker_data/
+    owner: debian
+    group: debian
+  tags: docker
+
+- name: Run docker-compose
+  docker_compose:
+    project_src: /home/debian/docker/
+    build: no
+  tags: docker

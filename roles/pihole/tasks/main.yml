@@ -1,0 +1,40 @@
+---
+
+- name: Install packages
+  apt:
+    package: 
+      - cron
+      - git
+    state: present
+  tags: pihole
+
+- name: 'Clone pihole repo'
+  ansible.builtin.git:
+    repo: 'https://github.com/pi-hole/pi-hole'
+    dest: /home/debian/pi-hole
+  tags: pihole
+
+- name: 'Create pihole config directory'
+  file: path=/etc/pihole/ state=directory
+  tags: pihole
+
+- name: 'Copy setupVars.conf'
+  copy: src=templates/setupVars.conf.j2 dest=/etc/pihole/setupVars.conf
+  tags: pihole
+
+- name: 'Install pi-hole'
+  ansible.builtin.shell: ./basic-install.sh --unattended
+  args:
+    chdir: "/home/debian/pi-hole/automated install"
+  tags: pihole
+
+- name: 'Reboot'
+  shell: sleep 2 && reboot
+  async: 1
+  poll: 0
+  ignore_errors: true
+  tags: pihole
+
+- name: "Wait for server to come back"
+  local_action: wait_for host={{ ansible_host }} port=22 state=started delay=10
+  become: false

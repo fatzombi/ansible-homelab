@@ -1,0 +1,26 @@
+---
+
+- name: Install packages
+  apt:
+    package: 
+      - nodejs
+      - npm
+    state: present
+  tags: homebridge
+  
+- name: Install Homebridge
+  npm:
+    name: homebridge
+    global: yes
+  tags: homebridge
+
+- name: 'Reboot'
+  shell: sleep 2 && reboot
+  async: 1
+  poll: 0
+  ignore_errors: true
+  tags: homebridge
+
+- name: "Wait for server to come back"
+  local_action: wait_for host={{ ansible_host }} port=22 state=started delay=10
+  become: false

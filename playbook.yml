@@ -1,0 +1,29 @@
+---
+
+- name: Ansible playbook for all our hosts
+  hosts: all
+  roles:
+    - debian
+  remote_user: debian
+  become: yes
+
+- name: Ansible playbook for configuring pihole
+  hosts: pihole
+  roles:
+    - pihole
+  remote_user: debian
+  become: yes
+
+- name: Ansible playbook for configuring homebridge
+  hosts: homebridge
+  roles:
+    - homebridge
+  remote_user: debian
+  become: yes
+  
+- name: Ansible playbook for configuring docker
+  hosts: docker
+  roles:
+    - docker
+  remote_user: debian
+  become: yes
